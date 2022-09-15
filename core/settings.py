@@ -37,7 +37,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'apps.authentication',
+    'rest_framework.authtoken',
 ]
+
+
+AUTH_USER_MODEL = "authentication.user"
+
+REST_FRAMEWORK = {
+
+    
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+   ),
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

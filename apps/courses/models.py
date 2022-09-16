@@ -3,6 +3,8 @@ from ..utils.models import UUIDModel, SlugModel
 from django.conf import settings
 USER = settings.AUTH_USER_MODEL
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Department(SlugModel):
@@ -107,10 +109,14 @@ class Resource(UUIDModel):
     
     date_added = models.DateField()
 
-    @property
-    def likes_count(self):
-        all_likes = self.likes_related
-        return all_likes.filter(is_liked=True).count() - all_likes.filter(is_liked=False).count()
+    likes_count = models.IntegerField(
+        default=0
+    )
+
+    # @property
+    # def likes_count(self):
+    #     all_likes = self.likes_related
+    #     return all_likes.filter(is_liked=True).count() - all_likes.filter(is_liked=False).count()
 
     class Meta:
         verbose_name_plural = 'Resources'
@@ -137,3 +143,17 @@ class Like(models.Model):
     is_liked = models.BooleanField(
         default= True
     )
+
+
+
+@receiver(post_save, sender=Like)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        resource = Resource.objects.get(id = instance.resource_id)
+
+        if instance.is_liked:
+            resource.likes_count +=1
+        else:
+            resource.likes_count -=1
+
+        resource.save()

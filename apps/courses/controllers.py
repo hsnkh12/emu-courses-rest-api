@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .serializers import CourseSerializer, ResourceSerializer
 from .models import Course, Department, Resource, Like
 from ..utils.serializers import ValidationCheck
@@ -15,9 +15,10 @@ from rest_framework.generics import ListAPIView
 class CourseListController(ListAPIView):
 
     queryset = Course.objects
-    filter_backends = [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
     filterset_fields = ['code','name','department__name']
     search_fields = ['^name','^code','=name','=code']
+    ordering_fields = ['name','code','credit']
 
     def get_serializer(self, *args, **kwargs):
 
@@ -85,3 +86,8 @@ class ResourceRetrieveController(ViewSet):
 
     def get_queryset(self):
         return Resource.objects.select_related('user')
+
+
+
+#Like cotroller
+#Rate comtroller

@@ -3,12 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .serializers import CourseSerializer, ResourceSerializer
+from .serializers import CourseSerializer, LikeSerializer, ResourceSerializer
 from .models import Course, Department, Resource, Like
 from ..utils.serializers import ValidationCheck
 from .permessions import IsAuthenticatedOrReadOnly
-from rest_framework.generics import ListAPIView
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework import status
 
 
 
@@ -40,16 +41,14 @@ class CourseRetrieveController(APIView):
         return Course.objects.select_related('department')
 
 
-
 class ResourceListController(ListAPIView):
 
     queryset = Resource.objects.select_related('user')
     serializer_class = ResourceSerializer
-    filter_backends = [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend,SearchFilter, OrderingFilter]
     filterset_fields = ['course__code','title']
+    ordering_fields = ['likes_count']
     
-
-
 
 class ResourceRetrieveController(ViewSet):
 
@@ -73,7 +72,6 @@ class ResourceRetrieveController(ViewSet):
             return Response({"course__code":["This query parameter is required."]})
 
         serializer = ResourceSerializer(data= request.data, fields= ['title', 'url', 'description', 'date_added'])
-
         return ValidationCheck(serializer, user=request.user, course = course)
 
     def update(self, request, pk=None):
@@ -83,11 +81,32 @@ class ResourceRetrieveController(ViewSet):
 
         return ValidationCheck(serializer)
         
-
     def get_queryset(self):
         return Resource.objects.select_related('user')
 
 
 
-#Like cotroller
-#Rate comtroller
+class LikeController(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk=None):
+        
+        resource = Resource.objects.get(pk=pk)
+
+        if not self.get_queryset().filter(resource__id = pk).exists():
+            serializer = LikeSerializer(data = request.data)
+            return ValidationCheck(serializer, user=request.user, resource=resource)
+
+        return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def delete(self, request, pk=None):
+
+        like_object = self.get_queryset().get(resource__id = pk)
+        like_object.delete()
+        return Response(status=status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return Like.objects
+
+

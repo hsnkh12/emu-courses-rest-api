@@ -3,7 +3,7 @@ from ..utils.models import UUIDModel, SlugModel
 from django.conf import settings
 USER = settings.AUTH_USER_MODEL
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 
@@ -147,7 +147,7 @@ class Like(models.Model):
 
 
 @receiver(post_save, sender=Like)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
+def update_like_count_on_create(sender, instance=None, created=False, **kwargs):
     if created:
         resource = Resource.objects.get(id = instance.resource_id)
 
@@ -157,3 +157,15 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
             resource.likes_count -=1
 
         resource.save()
+
+@receiver(post_delete, sender=Like)
+def update_like_count_on_delete(sender, instance=None, **kwargs):
+    
+    resource = Resource.objects.get(id = instance.resource_id)
+
+    if instance.is_liked:
+        resource.likes_count -=1
+    else:
+        resource.likes_count +=1
+
+    resource.save()

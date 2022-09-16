@@ -20,11 +20,11 @@ class CourseSerializer(DynamicFieldsModelSerializer):
         model = Course
         fields = '__all__'
 
-class LikeSerializer(serializers.Serializer):
+class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Like
-        fields = ['is_liked','user']
+        fields = ['is_liked']
 
 
 class UserSerializer(DynamicFieldsModelSerializer):

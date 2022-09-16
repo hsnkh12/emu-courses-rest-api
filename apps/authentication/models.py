@@ -18,7 +18,8 @@ class User(AbstractUser,UUIDModel):
     first_name = None
     last_name = None
 
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email

@@ -107,6 +107,11 @@ class Resource(UUIDModel):
     
     date_added = models.DateField()
 
+    @property
+    def likes_count(self):
+        all_likes = self.likes_related
+        return all_likes.filter(is_liked=True).count() - all_likes.filter(is_liked=False).count()
+
     class Meta:
         verbose_name_plural = 'Resources'
         ordering = ('-date_added',)

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.response import Response
+
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
@@ -19,3 +21,13 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
             existing = set(self.fields)
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
+
+
+def ValidationCheck(serializer,**kwargs):
+    
+    if serializer.is_valid():
+
+            serializer.save(**kwargs)
+            return Response(serializer.data)
+
+    return Response(serializer.errors)

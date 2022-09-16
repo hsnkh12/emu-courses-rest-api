@@ -1,9 +1,20 @@
+from dataclasses import field
 from ..utils.serializers import DynamicFieldsModelSerializer
-from .models import Course, Resource, Like
+from .models import Course, Resource, Like, Department
 from rest_framework import serializers
 from django.conf import settings
+from ..authentication.models import User
+
+
+class DepartmentSerializer(DynamicFieldsModelSerializer):
+
+    class Meta:
+        model = Department
+        fields = ['name']
 
 class CourseSerializer(DynamicFieldsModelSerializer):
+
+    department = DepartmentSerializer()
 
     class Meta:
         model = Course
@@ -16,19 +27,17 @@ class LikeSerializer(serializers.Serializer):
         fields = ['is_liked','user']
 
 
-class UserSerializer(serializers.Serializer):
+class UserSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
-        model = settings.AUTH_USER_MODEL
-        fields = ['username']
+        model = User
+        fields = '__all__'
 
 
 class ResourceSerializer(DynamicFieldsModelSerializer):
 
-    user = UserSerializer()
-    likes = LikeSerializer(many=True)
+    user = UserSerializer(fields=['id','username'])
 
     class Meta:
         model = Resource
-        fields = ['id','user','title','url','description','date_added','likes']
-        read_only_fields = ['id','user','likes']
+        fields = ['id', 'user' ,'title', 'url', 'description','date_added', 'likes_count']

@@ -5,7 +5,7 @@ USER = settings.AUTH_USER_MODEL
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-
+from django.db.models import Sum
 
 class Department(SlugModel):
     
@@ -54,6 +54,18 @@ class Course(models.Model):
     tutorial = models.SmallIntegerField(
         null = True
     )
+
+    @property
+    def difficulty_rate(self):
+        
+        rates = self.rates_related
+
+        if not rates.exists():
+            return None
+            
+        difficulty_sum = rates.aggregate(Sum('difficulty'))['difficulty__sum']
+        count = rates.count()
+        return {'avg':round(difficulty_sum/count, 2),'count':count}
         
     def __str__(self):
         return f'{self.code} | {self.name}'
@@ -69,6 +81,7 @@ class Rate(models.Model):
 
     user = models.ForeignKey(
         USER,
+        related_name= 'rates_related',
         on_delete = models.SET_NULL,
         null = True
     )

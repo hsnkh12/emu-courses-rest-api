@@ -1,10 +1,11 @@
 from rest_framework.routers import DefaultRouter
-from django.urls import path
+from django.urls import path, include
 from .controllers import (CourseListController, 
 CourseRetrieveController, 
 ResourceListController, 
 ResourceRetrieveController,
-LikeController
+LikeController,
+RateController
 )
 
 router = DefaultRouter()
@@ -13,8 +14,16 @@ router.register('resources', ResourceRetrieveController, basename='resources')
 
 urlpatterns = [
 
-    path('courses/',CourseListController.as_view(),name='courses'),
-    path('courses/<pk>/',CourseRetrieveController.as_view(),name='course-detail'),
-    path('resources/',ResourceListController.as_view(),name='resources-detail'),
-    path('resources/<pk>/like',LikeController.as_view(), name='like')
+    path('courses/', include([
+        path('',CourseListController.as_view(),name='courses'),
+        path('<pk>/',CourseRetrieveController.as_view(),name='course-detail'),
+        path('<pk>/rate/',RateController.as_view(),name='rate')
+    ])),
+    
+    path('resources/', include([
+        path('',ResourceListController.as_view(),name='resources-detail'),
+        path('<pk>/like',LikeController.as_view(), name='like'),
+    ]))
+    
+    
 ] + router.urls

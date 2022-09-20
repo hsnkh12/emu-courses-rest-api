@@ -1,14 +1,15 @@
+from tokenize import _all_string_prefixes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .serializers import CourseSerializer, LikeSerializer, ResourceSerializer
-from .models import Course, Department, Resource, Like
+from .serializers import CourseSerializer, LikeSerializer, ResourceSerializer, RateSerializer
+from .models import Course, Rate, Resource, Like
 from ..utils.serializers import ValidationCheck
 from .permessions import IsAuthenticatedOrReadOnly
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView
 from rest_framework import status
 
 
@@ -24,7 +25,7 @@ class CourseListController(ListAPIView):
     def get_serializer(self, *args, **kwargs):
 
         serializer_class = CourseSerializer
-        kwargs.setdefault('fields',['code','name'])
+        kwargs.setdefault('fields',['code','name','difficulty_rate'])
         return serializer_class(*args, **kwargs)
 
 
@@ -110,3 +111,20 @@ class LikeController(APIView):
         return Like.objects
 
 
+
+class RateController(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk=None):
+
+        course = Course.objects.get(code= pk)
+
+        if not request.user.rates_related.filter(course = course).exists():
+
+            serializer = RateSerializer(data = request.data)
+            return ValidationCheck(serializer, user=request.user, course=course)
+
+        return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        

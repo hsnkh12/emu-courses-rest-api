@@ -136,7 +136,7 @@ class Resource(UUIDModel):
         ordering = ('-date_added',)
 
     def __str__(self):
-        return self.url
+        return self.id
 
 
 class Like(models.Model):

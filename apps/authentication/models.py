@@ -1,10 +1,11 @@
+import resource
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from ..utils.models import UUIDModel
-# Create your models here.
+from ..courses.models import Resource
 
 
 class User(AbstractUser,UUIDModel):
@@ -24,6 +25,30 @@ class User(AbstractUser,UUIDModel):
     def __str__(self):
         return self.email
 
+
+class Report(UUIDModel):
+
+    REASON_CHOICES = (
+        ('I','Invalid resource'),
+        ('S','Spam or misleading'),
+        ('M','Misinformation'),
+        ('C','Captions issue')
+    )
+
+    resource = models.ForeignKey(
+        Resource,
+        on_delete= models.CASCADE,
+        related_name= 'reports_related'
+    )
+
+    reason = models.CharField(
+        max_length= 1,
+        choices= REASON_CHOICES
+    )
+
+    checked = models.BooleanField(
+        default= False
+    )
 
 @receiver(post_save, sender=User)
 def create_auth_token(sender, instance=None, created=False, **kwargs):

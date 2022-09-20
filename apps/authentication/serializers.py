@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Report
 from django.contrib.auth.password_validation import validate_password
 from ..utils.serializers import DynamicFieldsModelSerializer
 
@@ -38,3 +38,10 @@ class ProfileSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
+
+class ReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Report
+        fields = ['reason']

@@ -36,7 +36,8 @@ source env/bin/activate
 ```
 pip3 install -r requirements.txt
 ```
-Add EMU courses to the database using my scraping script -> https://github.com/hsnkh12/django-setup-script
+Add EMU courses to the database using my scraping script https://github.com/hsnkh12/django-setup-script
+
 Run the server and test the the app.
 ```
 Python3 manage.py runserver
